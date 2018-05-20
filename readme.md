@@ -7,7 +7,7 @@ It supports most of the combined features of
 [Ruby](https://apidock.com/ruby/DateTime/strftime),
 and [GNU C](https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html)
 strftime and strptime functions.
-With strtime is is possible to write and parse calendar dates (e.g. `%Y-%m-%d`),
+It's possible to write and parse calendar dates (e.g. `%Y-%m-%d`),
 week dates (e.g. `%G-W%V-%u`), and ordinal dates (e.g. `%Y-%j`).
 
 ## Installation
