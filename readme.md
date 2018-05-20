@@ -25,6 +25,14 @@ supports (e.g. `%Y`, `%b`) and how they behave in [directives.md](directives.md)
 
 ## Basic usage
 
+The **strftime** function accepts
+[Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) objects,
+unix timestamps (as milliseconds since UTC epoch),
+[moment](https://www.npmjs.com/package/moment) datetime objects,
+[luxon](https://www.npmjs.com/package/luxon) datetime objects, and
+[dayjs](https://www.npmjs.com/package/dayjs) datetime objects.
+The **strptime** function always outputs a Date object.
+
 ``` js
 const strftime = require("strtime").strftime;
 const strptime = require("strtime").strptime;
@@ -41,7 +49,7 @@ console.log(date.toISOString());
 
 ## Timezone output with strftime
 
-The strftime function uses the inputted Date object's local timezone offset by
+The **strftime** function uses the inputted Date object's local timezone offset by
 default.
 This behavior changes when the timestamp ends with a Zulu indicator ("Z"),
 for example in `%Y-%m-%dT%H:%M%SZ`; in this case it defaults to using UTC.
@@ -60,7 +68,7 @@ console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z"
 
 ## Timezone assumption with strptime
 
-The strptime function assumes that a timestamp represents a date in the local
+The **strptime** function assumes that a timestamp represents a date in the local
 timezone if no timezone is specified in that timestamp.
 Timestamps ending with a Zulu indicator ("Z"), for example in `%Y-%m-%dT%H:%M%SZ`,
 are assumed to be UTC.
@@ -79,7 +87,7 @@ console.log(date.toISOString());
 
 ## Locale-dependent strings
 
-The strftime and strptime functions default to english weekday names,
+The **strftime** and **strptime** functions default to english weekday names,
 month names, and ordinals.
 However, it is possible to specify different text by passing an options object.
 
