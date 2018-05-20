@@ -9,15 +9,18 @@ const defaultTimezoneNames = require("./timezone-names");
 const Directive = require("./directives.js");
 const TimestampParser = require("./parse.js");
 
-function getFormatOptions(options){
+function getFormatOptions(timezone, options){
     let useOptions;
     let tz = undefined;
-    if(Number.isFinite(options) || typeof(options) === "string"){
-        tz = options;
-        useOptions = {};
-    }else if(options){
-        tz = options.tz;
-        useOptions = options;
+    if(
+        timezone === null || timezone === undefined ||
+        Number.isFinite(timezone) || typeof(timezone) === "string"
+    ){
+        tz = timezone;
+        useOptions = options || {};
+    }else if(timezone && !options){
+        useOptions = timezone;
+        tz = useOptions.tz;
     }else{
         useOptions = {};
     }
@@ -43,7 +46,7 @@ function getTimezoneOffsetMinutes(date, tz){
     }
 }
 
-function strftime(date, format, options){
+function strftime(date, format, timezone, options){
     if(Number.isFinite(date)){
         // Accept unix timestamps (milliseconds since epoch)
         date = new Date(date);
@@ -60,7 +63,7 @@ function strftime(date, format, options){
     if(!(date instanceof Date)){
         throw new Error("Failed to get Date instance from date input.");
     }
-    const useOptions = getFormatOptions(options);
+    const useOptions = getFormatOptions(timezone, options);
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(date, useOptions.tz);
     const tzDate = new Date(date);
     if(timezoneOffsetMinutes !== undefined){
@@ -83,8 +86,8 @@ function strftime(date, format, options){
     return output;
 }
 
-function strptime(timestamp, format, options){
-    const useOptions = getFormatOptions(options);
+function strptime(timestamp, format, timezone, options){
+    const useOptions = getFormatOptions(timezone, options);
     const parser = new TimestampParser(timestamp, format);
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(undefined, useOptions.tz);
     if(timezoneOffsetMinutes !== undefined){
