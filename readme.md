@@ -29,7 +29,7 @@ You can add the strtime package to your project using a JavaScript package manag
 npm install --save strtime
 ```
 
-# Directives
+## Directives
 
 You can read complete documentation regarding the directives which strtime
 supports (e.g. `%Y`, `%b`) and how they behave in [directives.md](directives.md).
@@ -56,9 +56,9 @@ const date = strptime("2000-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%LZ");
 console.log(date.toISOString());
 ```
 
-# Advanced usage
+## Advanced usage
 
-## Timezone output with strftime
+### Timezone output with strftime
 
 The **strftime** function uses the inputted Date object's local timezone offset by
 default.
@@ -77,7 +77,7 @@ console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z"
 console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z", "EDT"));
 ```
 
-## Timezone assumption with strptime
+### Timezone assumption with strptime
 
 The **strptime** function assumes that a timestamp represents a date in the local
 timezone if no timezone is specified in that timestamp.
@@ -96,7 +96,7 @@ const date = strptime("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S", +0);
 console.log(date.toISOString());
 ```
 
-## Locale-dependent strings
+### Locale-dependent strings
 
 The **strftime** and **strptime** functions default to english weekday names,
 month names, and ordinals.
