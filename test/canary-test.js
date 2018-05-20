@@ -515,12 +515,13 @@ function createTests(strtime){
             this.test("parse", function(){
                 assert.equal(strptime("12:00 +0000", "%H:%M %z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 +0000", "%H:%M %z").getUTCMinutes(), 0);
+                assert.equal(strptime("12:00 ±0000", "%H:%M %z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 -0400", "%H:%M %z").getUTCHours(), 16);
                 assert.equal(strptime("12:00 +0400", "%H:%M %z").getUTCHours(), 8);
                 assert.equal(strptime("12:00 +0230", "%H:%M %z").getUTCHours(), 9);
                 assert.equal(strptime("12:00 +0230", "%H:%M %z").getUTCMinutes(), 30);
-                assert.equal(strptime("12:00 +01:00", "%H:%M %:z").getUTCHours(), 11);
-                assert.equal(strptime("12:00 +01:00", "%H:%M %:z").getUTCMinutes(), 0);
+                assert.equal(strptime("12:00 +01:00", "%H:%M %z").getUTCHours(), 11);
+                assert.equal(strptime("12:00 +01:00", "%H:%M %z").getUTCMinutes(), 0);
             });
         });
         this.group("Timezone name or offset %Z", function(){
@@ -534,12 +535,13 @@ function createTests(strtime){
             this.test("parse", function(){
                 assert.equal(strptime("12:00 +0000", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 +0000", "%H:%M %Z").getUTCMinutes(), 0);
+                assert.equal(strptime("12:00 ±0000", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 -0400", "%H:%M %Z").getUTCHours(), 16);
                 assert.equal(strptime("12:00 +0400", "%H:%M %Z").getUTCHours(), 8);
                 assert.equal(strptime("12:00 +0230", "%H:%M %Z").getUTCHours(), 9);
                 assert.equal(strptime("12:00 +0230", "%H:%M %Z").getUTCMinutes(), 30);
-                assert.equal(strptime("12:00 +01:00", "%H:%M %:Z").getUTCHours(), 11);
-                assert.equal(strptime("12:00 +01:00", "%H:%M %:Z").getUTCMinutes(), 0);
+                assert.equal(strptime("12:00 +01:00", "%H:%M %Z").getUTCHours(), 11);
+                assert.equal(strptime("12:00 +01:00", "%H:%M %Z").getUTCMinutes(), 0);
                 assert.equal(strptime("12:00 Z", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 UTC", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 EDT", "%H:%M %Z").getUTCHours(), 16); // -4
@@ -623,7 +625,7 @@ function createTests(strtime){
             for(let date of dates){
                 const timestamp = strftime(date[0], "%G-W%V-%u", {tz: 0});
                 assert.equal(timestamp, date[1], (
-                    `\nFor date ${date[0].toISOString()}:` +
+                    `\nFor ISO week date ${date[0].toISOString()}:` +
                     `\n- Expected "${date[1]}"` +
                     `\n- But found "${timestamp}`
                 ));
@@ -633,7 +635,7 @@ function createTests(strtime){
             for(let date of dates){
                 const parsed = strptime(date[1], "%G-W%V-%u", {tz: 0});
                 assert.deepStrictEqual(parsed, date[0], (
-                    `\nFor timestamp ${date[1]}:` +
+                    `\nFor ISO week timestamp ${date[1]}:` +
                     `\n- Expected "${date[0].toISOString()}"` +
                     `\n- But found "${parsed.toISOString()}`
                 ));
@@ -653,13 +655,13 @@ function createTests(strtime){
             for(let date of dates){
                 const eraTimestamp = strftime(date[0], "%-d %b %^Y %#", {tz: 0});
                 assert.equal(eraTimestamp, date[1], (
-                    `\nFor date ${date[0].toISOString()}:` +
+                    `\nFor CE/BCE date ${date[0].toISOString()}:` +
                     `\n- Expected "${date[1]}"` +
                     `\n- But found "${eraTimestamp}`
                 ));
                 const signedTimestamp = strftime(date[0], "%-d %b %Y", {tz: 0});
                 assert.equal(signedTimestamp, date[2], (
-                    `\nFor date ${date[0].toISOString()}:` +
+                    `\nFor CE/BCE date ${date[0].toISOString()}:` +
                     `\n- Expected "${date[2]}"` +
                     `\n- But found "${signedTimestamp}`
                 ));
@@ -669,13 +671,13 @@ function createTests(strtime){
             for(let date of dates){
                 const eraParsed = strptime(date[1], "%-d %b %^Y %#", {tz: 0});
                 assert.deepStrictEqual(eraParsed, date[0], (
-                    `\nFor timestamp ${date[1]}:` +
+                    `\nFor CE/BCE timestamp ${date[1]}:` +
                     `\n- Expected "${date[0].toISOString()}"` +
                     `\n- But found "${eraParsed.toISOString()}`
                 ));
                 const signedParsed = strptime(date[2], "%-d %b %Y", {tz: 0});
                 assert.deepStrictEqual(signedParsed, date[0], (
-                    `\nFor timestamp ${date[2]}:` +
+                    `\nFor CE/BCE timestamp ${date[2]}:` +
                     `\n- Expected "${date[0].toISOString()}"` +
                     `\n- But found "${signedParsed.toISOString()}`
                 ));
@@ -787,7 +789,7 @@ function createTests(strtime){
             "%C %y %U %a %H %M %S %L",
         ];
         const getAssertMessage = (format, timestamp, expected, actual) => (
-            `\nFailed with format "${format}".` +
+            `\nFailed format reversibility for "${format}".` +
             `\nInput date was ${expected.toISOString()}.` +
             `\nIntermediate timestamp was "${timestamp}".` +
             `\nMismatched parse result was ${actual.toISOString()}.`
@@ -870,11 +872,83 @@ function createTests(strtime){
     
     canary.group("graceful failure states", function(){
         this.test("invalid directives produce a readable error", function(){
-            assert.throws(() => {
-                strftime(new Date(), "%Y-%m-%d %?");
-            }, {
+            assert.throws(() => strftime(new Date(), "%Y-%m-%d %?"), {
                 name: "TimestampParseError",
-                message: `Failed to parse format "%Y-%m-%d %?": Unknown directive "%?".`,
+                message: `Failed with format "%Y-%m-%d %?": Unknown directive "%?".`,
+            });
+            assert.throws(() => strptime("2000-01-01", "%Y-%m-%?"), {
+                name: "TimestampParseError",
+                message: `Failed with format "%Y-%m-%?": Unknown directive "%?".`,
+            });
+        });
+        this.test("parse format is an empty string", function(){
+            assert.throws(() => strptime("2000-01-01", ""), {
+                name: "TimestampParseError",
+                message: `Failed with format "": Empty format string.`,
+            });
+        });
+        this.test("parse format is longer than input timestamp", function(){
+            assert.throws(() => strptime("2000-01-01", "%F %T"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token " " at position [10] in timestamp "2000-01-01" with format "%F %T": Timestamp is too short to match the whole format.`,
+            });
+        });
+        this.test("parse format is shorter than input timestamp", function(){
+            assert.throws(() => strptime("2000-01-01 00:00:00", "%F"), {
+                name: "TimestampParseError",
+                message: `Failed with format "%F": Timestamp is too long for the given format. Text remaining: " 00:00:00".`,
+            });
+        });
+        this.test("parse format with unmatched string literal", function(){
+            assert.throws(() => strptime("2000-01-01", "%Y.%m.%d"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token "." at position [4] in timestamp "2000-01-01" with format "%Y.%m.%d": String literal "." not matched.`,
+            });
+        });
+        this.test("parse format with number out of range", function(){
+            assert.throws(() => strptime("-2000 Jan -20", "%Y %b %d"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token "%d" at position [10] in timestamp "-2000 Jan -20" with format "%Y %b %d": Number cannot be negative.`,
+            });
+            assert.throws(() => strptime("2000-50-50", "%Y-%m-%d"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token "%m" at position [7] in timestamp "2000-50-50" with format "%Y-%m-%d": Number [50] is out of bounds [1, 12].`,
+            });
+        });
+        this.group("parse format with invalid timezone data", function(){
+            assert.throws(() => strptime("2000-01-01 ?0000", "%F %z"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token "%z" at position [16] in timestamp "2000-01-01 ?0000" with format "%F %z": Unknown timezone offset sign "?".`,
+            });
+            assert.throws(() => strptime("2000-01-01 +??:??", "%F %z"), {
+                name: "TimestampParseError",
+                message: `Failed to parse token "%z" at position [17] in timestamp "2000-01-01 +??:??" with format "%F %z": Failed to parse timezone offset from string "+??:??".`,
+            });
+        });
+        this.group("parse timestamps with invalid names of things", function(){
+            this.test("attempt to parse invalid weekday name", function(){
+                assert.throws(() => strptime("Someday 2018-01-01", "%A %F"), {
+                    name: "TimestampParseError",
+                    message: `Failed to parse token "%A" at position [0] in timestamp "Someday 2018-01-01" with format "%A %F": Failed to parse weekday name.`,
+                });
+            });
+            this.test("attempt to parse invalid month name", function(){
+                assert.throws(() => strptime("1 NotAMonth 2018", "%-d %B %Y"), {
+                    name: "TimestampParseError",
+                    message: `Failed to parse token "%B" at position [2] in timestamp "1 NotAMonth 2018" with format "%-d %B %Y": Failed to parse month name.`,
+                });
+            });
+            this.test("attempt to parse invalid AM/PM text", function(){
+                assert.throws(() => strptime("2018-01-01 10:00 ??", "%F %I:%M %p"), {
+                    name: "TimestampParseError",
+                    message: `Failed to parse token "%p" at position [17] in timestamp "2018-01-01 10:00 ??" with format "%F %I:%M %p": Failed to parse AM/PM.`,
+                });
+            });
+            this.test("attempt to parse invalid era name", function(){
+                assert.throws(() => strptime("1 Jan 2018 ??", "%-d %b %^Y %#"), {
+                    name: "TimestampParseError",
+                    message: `Failed to parse token "%#" at position [11] in timestamp "1 Jan 2018 ??" with format "%-d %b %^Y %#": Failed to parse era name.`,
+                });
             });
         });
     });
