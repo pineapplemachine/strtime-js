@@ -583,8 +583,8 @@ function createTests(strtime){
             assert.equal(strftime(date, "%F %T"), "2018-05-04 22:15:30");
             assert.equal(strftime(date, "%Y-%m-%d %H:%M:%S"), "2018-05-04 22:15:30");
             assert.equal(strftime(date, "%-m/%-d/%y"), "5/4/18");
-            assert.equal(strftime(date, "%FT%TZ"), "2018-05-04T22:15:30Z");
-            assert.equal(strftime(date, "%FT%T.%LZ"), "2018-05-04T22:15:30.000Z");
+            assert.equal(strftime(date, "%FT%T"), "2018-05-04T22:15:30");
+            assert.equal(strftime(date, "%FT%T.%L"), "2018-05-04T22:15:30.000");
             assert.equal(strftime(date, "%A %-d %B %Y %I:%M %p"), "Friday 4 May 2018 10:15 PM");
         });
         this.test("parse common formats", function(){
@@ -712,6 +712,10 @@ function createTests(strtime){
             assert.equal(strftime(date, "%F %T %z", -3.5), "2018-06-15 09:00:00 -0330");
             assert.equal(strftime(date, "%F %T %z", +120), "2018-06-15 14:30:00 +0200");
             assert.equal(strftime(date, "%F %T %z", -120), "2018-06-15 10:30:00 -0200");
+        });
+        this.test("write with explicit timezone overrides 'Z' ending", function(){
+            assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ"), "2018-01-01T00:00:00Z");
+            assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ", {tz: +2}), "2018-01-01T02:00:00Z");
         });
         this.test("write attempt with unknown timezone name", function(){
             assert.throws(() => {

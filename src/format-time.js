@@ -1,5 +1,6 @@
 // References:
 // https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_71/rtref/strpti.htm
+// https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
 // https://www.gnu.org/software/libc/manual/html_node/Low_002dLevel-Time-String-Parsing.html
 // http://man7.org/linux/man-pages/man3/strptime.3.html
 // https://apidock.com/ruby/DateTime/strftime
@@ -63,6 +64,7 @@ function strftime(date, format, timezone, options){
     if(!(date instanceof Date)){
         throw new Error("Failed to get Date instance from date input.");
     }
+    const tokens = TimestampParser.parseFormatString(format);
     const useOptions = getFormatOptions(timezone, options);
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(date, useOptions.tz);
     const tzDate = new Date(date);
@@ -72,9 +74,14 @@ function strftime(date, format, timezone, options){
             date.getTimezoneOffset() +
             timezoneOffsetMinutes
         );
+    }else if(tokens.zuluTimezone){
+        tzDate.setUTCMinutes(
+            date.getUTCMinutes() +
+            date.getTimezoneOffset()
+        );
     }
     let output = "";
-    for(let token of TimestampParser.parseFormatString(format)){
+    for(let token of tokens){
         if(token instanceof Directive){
             output += token.write(tzDate, "", useOptions.options, timezoneOffsetMinutes);
         }else if(token instanceof Directive.Token){
@@ -110,3 +117,6 @@ const strtime = {
 };
 
 module.exports = strtime;
+
+console.log(strftime(new Date("2000-01-01"), "%Y-%m-%dT%H:%M:%S.%LZ"));
+console.log(strptime("2000-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%LZ").toISOString());
