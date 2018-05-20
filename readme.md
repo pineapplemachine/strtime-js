@@ -1,5 +1,7 @@
 # strtime
 
+[![MIT License][license-image]][license] [![Build Status][travis-image]][travis-url] [![NPM version][npm-version-image]][npm-url]
+
 The strtime package provides native JavaScript implementations of the
 **strftime** and **strptime** functions.
 It supports most of the combined features of
@@ -9,6 +11,15 @@ and [GNU C](https://www.gnu.org/software/libc/manual/html_node/Formatting-Calend
 strftime and strptime functions.
 It's possible to write and parse calendar dates (e.g. `%Y-%m-%d`),
 week dates (e.g. `%G-W%V-%u`), and ordinal dates (e.g. `%Y-%j`).
+
+[license-image]: http://img.shields.io/badge/license-MIT-blue.svg
+[license]: https://github.com/pineapplemachine/strtime-js/blob/master/LICENSE
+
+[travis-url]: https://travis-ci.org/pineapplemachine/strtime-js
+[travis-image]: https://travis-ci.org/pineapplemachine/strtime-js.svg?branch=master
+
+[npm-url]: https://www.npmjs.com/package/strtime
+[npm-version-image]: https://badge.fury.io/js/strtime.svg
 
 ## Installation
 
