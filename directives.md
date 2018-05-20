@@ -4,6 +4,9 @@ Here is complete documention regarding the directives that strtime supports.
 
 ## Modifiers
 
+Directives can be modified using special characters.
+An unmodified directive looks like `%d`. A modified directive looks like `%-d` or `%_d` or `%:d` or `%^B`.
+
 - `-` Don't pad; i.e. produce `1` when normally `01` would be produced.
 - `_` Pad with spaces; i.e. produce ` 1` instead of `01`.
 - `^` Switch case (make lowercase if fully upper, uppercase otherwise), or unsigned year %Y for use with era.
@@ -40,6 +43,7 @@ timestamp produced with the output of any other modifier
 - `%L` millisecond in second (000-999)
 - `%m` month number (00-12)
 - `%M` minute (00-59)
+- `%n` newline character "\n"
 - `%p` uppercase AM/PM
 - `%P` lowercase am/pm
 - `%Q` number of microseconds since epoch
@@ -47,6 +51,7 @@ timestamp produced with the output of any other modifier
 - `%R` 24-hour time; same as `%H:%M`
 - `%s` number of seconds since epoch
 - `%S` second (normally 00-59; strictly 00-61)
+- `%t` tab character "\t"
 - `%T` 24-hour time; same as `%H:%M:%S`
 - `%v` VMS date; same as `%e-%b-%Y`
 - `%V` ISO 8601 week number (01-53)
@@ -62,3 +67,4 @@ timestamp produced with the output of any other modifier
 - `%Z` timezone name or offset, e.g. "UTC" or "+0100"
 - `%+` date; same as "%a %b %e %H:%M:%S %Z %Y"
 - `%#` era name, i.e. "CE" or "BCE"
+- `%%` literal "%" character
