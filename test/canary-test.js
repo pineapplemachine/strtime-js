@@ -742,6 +742,67 @@ function createTests(strtime){
         });
     });
     
+    canary.group("custom locale strings", function(){
+        const spanish = {
+            shortWeekdayNames: [
+                "D", "L", "M", "X", "J", "V", "S"
+            ],
+            longWeekdayNames: [
+                "domingo", "lunes", "martes", "miércoles",
+                "jueves", "viernes", "sábado"
+            ],
+            shortMonthNames: [
+                "ene", "feb", "mar", "abr", "may", "jun",
+                "jul", "ago", "sep", "oct", "nov", "dic"
+            ],
+            longMonthNames: [
+                "enero", "febrero", "marzo",
+                "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre",
+                "octubre", "noviembre", "diciembre"
+            ],
+            ordinalTransform: number => {
+                return `${number}ª`;
+            },
+        };
+        this.test("write custom weekday names", function(){
+            assert.equal(strftime(new Date("2018-05-19"), "%a", "UTC", spanish), "S");
+            assert.equal(strftime(new Date("2018-05-19"), "%A", "UTC", spanish), "sábado");
+        });
+        this.test("write custom month names", function(){
+            assert.equal(strftime(new Date("2018-01-01"), "%b", "UTC", spanish), "ene");
+            assert.equal(strftime(new Date("2018-01-01"), "%B", "UTC", spanish), "enero");
+        });
+        this.test("write custom ordinals", function(){
+            assert.equal(
+                strftime(new Date("2018-01-01"), "%:d día de %B de %Y", "UTC", spanish),
+                "1ª día de enero de 2018"
+            );
+        });
+        this.test("parse custom weekday names", function(){
+            const date = new Date("2008-02-25");
+            assert.deepStrictEqual(strptime("2008-W09-L", "%G-W%V-%A", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("2008-W09-l", "%G-W%V-%A", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("2008-W09-lunes", "%G-W%V-%A", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("2008-W09-Lunes", "%G-W%V-%A", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("2008-W09-LUNES", "%G-W%V-%A", "UTC", spanish), date);
+        });
+        this.test("parse custom month names", function(){
+            const date = new Date("2018-03-10");
+            assert.deepStrictEqual(strptime("10 mar 2018", "%d %b %Y", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("10 MAR 2018", "%d %b %Y", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("10 marzo 2018", "%d %b %Y", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("10 Marzo 2018", "%d %b %Y", "UTC", spanish), date);
+            assert.deepStrictEqual(strptime("10 MARZO 2018", "%d %b %Y", "UTC", spanish), date);
+        });
+        this.test("parse custom ordinals", function(){
+            const date = new Date("2018-07-10");
+            assert.deepStrictEqual(strptime(
+                "10ª día de julio de 2018", "%:d día de %B de %Y", "UTC", spanish
+            ), date);
+        });
+    });
+    
     canary.group("reversibility of various date and format combinations", function(){
         const dates = [
             new Date("0004-02-29T10:01:05.800Z"),
