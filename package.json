@@ -1,0 +1,46 @@
+{
+  "name": "strtime",
+  "version": "1.0.0",
+  "description": "Comprehensive strftime and strptime implementation in JavaScript.",
+  "keywords": [
+    "strftime",
+    "strptime",
+    "time",
+    "timestamp",
+    "date",
+    "datetime",
+    "format",
+    "string"
+  ],
+  "homepage": "https://github.com/pineapplemachine/strtime-js",
+  "license": "MIT",
+  "dependencies": {},
+  "main": "dist/strtime.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pineapplemachine/strtime-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pineapplemachine/strtime-js/issues",
+    "email": "dev.messages@mapita.fi"
+  },
+  "contributors": [
+    {
+      "name": "Sophie Kirschner",
+      "email": "sophiek@pineapplemachine.com"
+    },
+  ],
+  "scripts": {
+    "test": "node test/canary-test.js",
+    "prepublish": "npm test"
+  },
+  "devDependencies": {
+    "canary-test": "^1.0.2",
+    "dayjs": "^1.6.2",
+    "luxon": "^1.2.1",
+    "moment": "^2.22.1"
+  }
+}
