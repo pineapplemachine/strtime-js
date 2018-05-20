@@ -1,7 +1,7 @@
 {
   "name": "strtime",
   "version": "1.0.0",
-  "description": "Comprehensive strftime and strptime implementation in JavaScript.",
+  "description": "Comprehensive strftime and strptime implementation.",
   "keywords": [
     "strftime",
     "strptime",
@@ -24,23 +24,28 @@
     "url": "https://github.com/pineapplemachine/strtime-js.git"
   },
   "bugs": {
-    "url": "https://github.com/pineapplemachine/strtime-js/issues",
-    "email": "dev.messages@mapita.fi"
+    "url": "https://github.com/pineapplemachine/strtime-js/issues"
   },
   "contributors": [
     {
       "name": "Sophie Kirschner",
       "email": "sophiek@pineapplemachine.com"
-    },
+    }
   ],
   "scripts": {
-    "test": "node test/canary-test.js",
-    "prepublish": "npm test"
+    "build": "node bin/build.js",
+    "test": "npm run test-source",
+    "test-all": "npm run test-source && npm run test-release && npm run test-uglified",
+    "test-source": "node test/source-test.js",
+    "test-release": "node test/release-test.js",
+    "test-uglified": "node test/uglified-test.js",
+    "prepublish": "npm run build && npm run test-all"
   },
   "devDependencies": {
     "canary-test": "^1.0.2",
     "dayjs": "^1.6.2",
     "luxon": "^1.2.1",
-    "moment": "^2.22.1"
+    "moment": "^2.22.1",
+    "uglify-es": "^3.3.9"
   }
 }

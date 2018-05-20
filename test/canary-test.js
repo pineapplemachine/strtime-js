@@ -1018,5 +1018,3 @@ function createTests(strtime){
 };
 
 module.exports = createTests;
-
-createTests(require("../src/format-time")).doReport();
