@@ -571,6 +571,33 @@ function createTests(strtime){
                 assert.deepStrictEqual(strptime("12 June 300 BCE", "%-d %B %Y %#", {tz: 0}), bceDate);
             });
         });
+        this.group("Literal % character %%", function(){
+            const date = new Date("2001-01-01");
+            this.test("format", function(){
+                assert.equal(strftime(date, "%%%% %%", {tz: 0}), "%% %");
+            });
+            this.test("parse", function(){
+                assert.deepStrictEqual(strptime("2001-01-01%", "%F%%", {tz: 0}), date);
+            });
+        });
+        this.group("Tab \\t character %t", function(){
+            const date = new Date("2001-01-01");
+            this.test("format", function(){
+                assert.equal(strftime(date, "%t", {tz: 0}), "\t");
+            });
+            this.test("parse", function(){
+                assert.deepStrictEqual(strptime("2001-01-01\t", "%F%t", {tz: 0}), date);
+            });
+        });
+        this.group("Newline \\n character %%", function(){
+            const date = new Date("2001-01-01");
+            this.test("format", function(){
+                assert.equal(strftime(date, "%n", {tz: 0}), "\n");
+            });
+            this.test("parse", function(){
+                assert.deepStrictEqual(strptime("2001-01-01\n", "%F%n", {tz: 0}), date);
+            });
+        });
     });
     
     canary.group("common timestamp formats", function(){
