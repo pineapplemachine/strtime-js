@@ -25,7 +25,7 @@ function TimestampParseError(reason, parser){
         `in format "${this.format}": ${this.reason}`
     );
     else this.message = (
-        `Failed to parse format "${this.format}": ${this.reason}`
+        `Failed with format "${this.format}": ${this.reason}`
     );
     // https://nodejs.org/api/errors.html#errors_error_capturestacktrace_targetobject_constructoropt
     if(Error.captureStackTrace){

@@ -186,6 +186,17 @@ class Directive{
             (!Number.isFinite(this.maximum) || value <= this.maximum)
         );
     }
+    getBoundsString(){
+        if(Number.isFinite(this.minimum) && Number.isFinite(this.maximum)){
+            return `[${this.minimum}, ${this.maximum}]`;
+        }else if(Number.isFinite(this.minimum)){
+            return `[${this.minimum}, ...]`;
+        }else if(Number.isFinite(this.maximum)){
+            return `[..., ${this.maximum}]`;
+        }else{
+            return undefined;
+        }
+    }
     toString(){
         return "%" + this.names[0];
     }
@@ -247,6 +258,9 @@ Directive.Token = class DirectiveToken{
     }
     numberInBounds(value){
         return this.directive.numberInBounds(value);
+    }
+    getBoundsString(){
+        return this.directive.getBoundsString();
     }
     toString(){
         return "%" + this.modifier + this.directive.names[0];
@@ -480,7 +494,7 @@ Directive.list = [
         padLength: 2,
         likelyLength: 2,
         minimum: 1,
-        maximum: 31,
+        maximum: 12,
         store: function(number){
             this.month = number;
         },

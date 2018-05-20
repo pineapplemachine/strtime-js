@@ -232,12 +232,11 @@ class TimestampParser{
     }
     parse(startTokenIndex){
         for(let i = startTokenIndex || 0; i < this.tokens.length; i++){
-            this.currentToken = undefined;
+            const token = this.tokens[i];
+            this.currentToken = token;
             if(this.index >= this.string.length) throw new TimestampParseError(
                 "Timestamp is too short to match the whole format.", this
             );
-            const token = this.tokens[i];
-            this.currentToken = token;
             if(token instanceof Directive.StringToken){
                 this.parseStringToken(token.string);
             }else if(token.hasParseFunction()){
@@ -257,12 +256,16 @@ class TimestampParser{
                 throw new TimestampParseError("Invalid directive.", this);
             }
         }
+        this.currentToken = undefined;
+        if(1 + this.index < this.string.length) throw new TimestampParseError(
+            `Timestamp is too long for the given format. Text remaining: "${this.string.slice(this.index)}".`, this
+        );
         return this;
     }
     parseStringToken(token){
         for(let i = 0; i < token.length; i++){
             if(this.string[this.index] !== token[i]){
-                throw new TimestampParseError("String literal not matched.", this);
+                throw new TimestampParseError(`String literal "${token}" not matched.`, this);
             }
             this.index++;
         }
@@ -322,7 +325,7 @@ class TimestampParser{
         if(!Number.isInteger(value)){
             throw new TimestampParseError("Failed to parse number.", this);
         }else if(!directive.numberInBounds(value)){
-            throw new TimestampParseError("Number out of bounds.", this);
+            throw new TimestampParseError(`Number [${value}] is out of bounds ${directive.getBoundsString()}.`, this);
         }
         const result = negative ? -value : value;
         if(directive.isOrdinal()){
@@ -399,26 +402,27 @@ class TimestampParser{
         return this.timezoneNameList;
     }
     parseTimezoneOffset(modifier){
+        const start = this.index;
         const sign = this.string[this.index];
         const hours = +this.string.slice(this.index + 1, this.index + 3);
         let minutes;
-        if(modifier === ":"){
+        if(this.string[this.index + 3] === ":"){
             minutes = +this.string.slice(this.index + 4, this.index + 6);
             this.index += 6;
-        }else if(modifier === "::"){
-            minutes = +this.string.slice(this.index + 4, this.index + 6);
-            this.index += 9;
         }else{
             minutes = +this.string.slice(this.index + 3, this.index + 5);
             this.index += 5;
         }
         if(!Number.isInteger(hours) || !Number.isInteger(minutes)){
-            throw new TimestampParseError("Problem parsing timezone offset value.", this);
+            throw new TimestampParseError(
+                `Failed to parse timezone offset from string ` +
+                `"${this.string.slice(start, this.index)}".`, this
+            );
         }
         const offset = minutes + 60 * hours;
-        if(sign === "+") return +offset;
+        if(sign === "+" || sign === "±") return +offset;
         else if(sign === "-") return -offset;
-        else throw new TimestampParseError("Bad timezone offset sign.", this);
+        else throw new TimestampParseError(`Unknown timezone offset sign "${sign}".`, this);
     }
 }
 
@@ -427,6 +431,11 @@ TimestampParser.parseFormatString = function parseFormatString(format){
     let directive = false;
     let modifier = undefined;
     const formatString = String(format);
+    if(!formatString){
+        throw new TimestampParseError(`Empty format string.`, {
+            format: formatString
+        });
+    }
     function addCharacter(ch){
         if(tokens.length && (tokens[tokens.length - 1] instanceof Directive.StringToken)){
             if(isDigit(ch) === isDigit(tokens[tokens.length - 1].string[0])){
@@ -474,6 +483,9 @@ TimestampParser.parseFormatString = function parseFormatString(format){
         }else{
             addCharacter(ch);
         }
+    }
+    if(tokens.length && tokens[tokens.length - 1].string === "Z"){
+        tokens.zuluTimezone = true;
     }
     return tokens;
 }

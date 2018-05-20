@@ -89,7 +89,7 @@ function strptime(timestamp, format, options){
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(undefined, useOptions.tz);
     if(timezoneOffsetMinutes !== undefined){
         parser.timezoneOffsetMinutes = timezoneOffsetMinutes;
-    }else if(parser.tokens[parser.tokens.length - 1].string === "Z"){
+    }else if(parser.tokens.zuluTimezone){
         parser.timezoneOffsetMinutes = 0;
     }
     if(useOptions.options){
