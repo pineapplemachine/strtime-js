@@ -64,7 +64,7 @@ The **strftime** function uses the inputted Date object's local timezone offset 
 default.
 This behavior changes when the timestamp ends with a Zulu indicator ("Z"),
 for example in `%Y-%m-%dT%H:%M%SZ`; in this case it defaults to using UTC.
-You can specify which timezone should be used by passing it as an argument.
+You can specify which timezone should be used by passing it as an argument. Timezones are accepted as numeric offsets or as abbreviations such as `UTC` or `EDT` or `EEST`. Offsets between and including -16 and +16 are interpreted as hour offsets. Other offset values are interpreted as minute offsets.
 
 ``` js
 // Prints e.g. "2000-01-01 14:00:00 GMT+0200"
@@ -104,8 +104,8 @@ However, it is possible to specify different text by passing an options object.
 
 The options object attributes which are recognized for this purpose are:
 
-- **shortWeekdayNames**: A list of abbreviated weekday names, e.g. "Mon", "Tue".
-- **longWeekdayNames**: A list of full weekday names, e.g. "Monday", "Tuesday".
+- **shortWeekdayNames**: A list of abbreviated weekday names, e.g. "Sun", "Mon".
+- **longWeekdayNames**: A list of full weekday names, e.g. "Sunday", "Monday".
 - **shortMonthNames**: A list of abbreviated month names, e.g. "Jan", "Feb".
 - **longMonthNames**: A list of full month names, e.g. "January", "February".
 - **eraNames**: A list of era names, e.g. "CE", "BCE".
