@@ -484,6 +484,11 @@ TimestampParser.parseFormatString = function parseFormatString(format){
             addCharacter(ch);
         }
     }
+    if(directive) throw new TimestampParseError(
+        "Found unterminated directive at the end of the format string.", {
+            format: formatString
+        }
+    );
     if(tokens.length && tokens[tokens.length - 1].string === "Z"){
         tokens.zuluTimezone = true;
     }

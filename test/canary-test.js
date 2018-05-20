@@ -973,6 +973,16 @@ function createTests(strtime){
                 message: `Failed with format "%Y-%m-%?": Unknown directive "%?".`,
             });
         });
+        this.test("unterminated directive produces a readable error", function(){
+            assert.throws(() => strftime(new Date(), "%"), {
+                name: "TimestampParseError",
+                message: `Failed with format "%": Found unterminated directive at the end of the format string.`,
+            });
+            assert.throws(() => strptime("2000-01-01", "%"), {
+                name: "TimestampParseError",
+                message: `Failed with format "%": Found unterminated directive at the end of the format string.`,
+            });
+        });
         this.test("parse format is an empty string", function(){
             assert.throws(() => strptime("2000-01-01", ""), {
                 name: "TimestampParseError",
