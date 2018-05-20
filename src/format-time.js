@@ -117,6 +117,3 @@ const strtime = {
 };
 
 module.exports = strtime;
-
-console.log(strftime(new Date("2000-01-01"), "%Y-%m-%dT%H:%M:%S.%LZ"));
-console.log(strptime("2000-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%LZ").toISOString());

@@ -2,6 +2,7 @@
 // MIT license, Copyright (c) 2018 Sophie Kirschner (sophiek@pineapplemachine.com)
 // References:
 // https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_71/rtref/strpti.htm
+// https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
 // https://www.gnu.org/software/libc/manual/html_node/Low_002dLevel-Time-String-Parsing.html
 // http://man7.org/linux/man-pages/man3/strptime.3.html
 // https://apidock.com/ruby/DateTime/strftime
@@ -62,6 +63,7 @@ function strftime(date, format, timezone, options){
     if(!(date instanceof Date)){
         throw new Error("Failed to get Date instance from date input.");
     }
+    const tokens = TimestampParser.parseFormatString(format);
     const useOptions = getFormatOptions(timezone, options);
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(date, useOptions.tz);
     const tzDate = new Date(date);
@@ -71,9 +73,14 @@ function strftime(date, format, timezone, options){
             date.getTimezoneOffset() +
             timezoneOffsetMinutes
         );
+    }else if(tokens.zuluTimezone){
+        tzDate.setUTCMinutes(
+            date.getUTCMinutes() +
+            date.getTimezoneOffset()
+        );
     }
     let output = "";
-    for(let token of TimestampParser.parseFormatString(format)){
+    for(let token of tokens){
         if(token instanceof Directive){
             output += token.write(tzDate, "", useOptions.options, timezoneOffsetMinutes);
         }else if(token instanceof Directive.Token){
@@ -1422,6 +1429,11 @@ TimestampParser.parseFormatString = function parseFormatString(format){
             addCharacter(ch);
         }
     }
+    if(directive) throw new TimestampParseError(
+        "Found unterminated directive at the end of the format string.", {
+            format: formatString
+        }
+    );
     if(tokens.length && tokens[tokens.length - 1].string === "Z"){
         tokens.zuluTimezone = true;
     }
