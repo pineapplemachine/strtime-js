@@ -43,6 +43,7 @@ function createTests(strtime){
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 17}), "%a"), "Thu");
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 18}), "%a"), "Fri");
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 19}), "%a"), "Sat");
+                assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 19}), "%^a"), "SAT");
             });
             this.test("parse", function(){
                 assert.deepStrictEqual(strptime("2018-W20-Fri", "%G-W%V-%a", {tz: 0}), getUTCDate({year: 2018, month: 5, day: 18}));
@@ -211,7 +212,11 @@ function createTests(strtime){
         this.group("Full ISO week year %G", function(){
             this.test("format", function(){
                 assert.equal(strftime(new Date("2000-06-15"), "%G"), "2000");
+                assert.equal(strftime(getUTCDate({year: 200, month: 6}), "%G"), "0200");
                 assert.equal(strftime(getUTCDate({year: -2000, month: 6}), "%G"), "-2000");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%G"), "-0029");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%_G"), " -29");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%-G"), "-29");
             });
             this.test("parse", function(){
                 assert.equal(strptime("2000-W10", "%G-W%V").getFullYear(), 2000);
@@ -499,6 +504,10 @@ function createTests(strtime){
             this.test("format", function(){
                 assert.equal(strftime(new Date("2000-06-15"), "%Y"), "2000");
                 assert.equal(strftime(getUTCDate({year: -2000}), "%Y"), "-2000");
+                assert.equal(strftime(getUTCDate({year: -59}), "%Y"), "-0059");
+                assert.equal(strftime(getUTCDate({year: -59}), "%_Y"), " -59");
+                assert.equal(strftime(getUTCDate({year: -59}), "%-Y"), "-59");
+                assert.equal(strftime(getUTCDate({year: -59}), "%^Y"), "60");
             });
             this.test("parse", function(){
                 assert.equal(strptime("2000", "%Y").getFullYear(), 2000);
