@@ -544,6 +544,7 @@ function createTests(strtime){
                 assert.equal(strptime("12:00 +01:00", "%H:%M %Z").getUTCMinutes(), 0);
                 assert.equal(strptime("12:00 Z", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 UTC", "%H:%M %Z").getUTCHours(), 12);
+                assert.equal(strptime("12:00 utc", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 EDT", "%H:%M %Z").getUTCHours(), 16); // -4
                 assert.equal(strptime("12:00 EEST", "%H:%M %Z").getUTCHours(), 9); // +3
                 assert.equal(strptime("12:00 ACDT", "%H:%M %Z").getUTCHours(), 1); // +10.5
@@ -710,7 +711,10 @@ function createTests(strtime){
     
     canary.group("providing an explicit timezone option", function(){
         const date = new Date("2018-06-15T12:30:00Z");
-        this.test("write using the default timezone (local)", function(){
+        this.test("write using the default timezone (UTC)", function(){
+            assert.equal(strftime(date, "%F %T %z"), "2018-06-15 12:30:00 +0000");
+        });
+        this.test("write using the local timezone", function(){
             const localTimezoneOffset = -(date.getTimezoneOffset());
             const absOffset = Math.abs(localTimezoneOffset);
             const tzSign = localTimezoneOffset >= 0 ? "+" : "-";
@@ -725,6 +729,7 @@ function createTests(strtime){
         this.test("write with a specific timezone", function(){
             assert.equal(strftime(date, "%F %T %z", {tz: 0}), "2018-06-15 12:30:00 +0000");
             assert.equal(strftime(date, "%F %T %z", {tz: "UTC"}), "2018-06-15 12:30:00 +0000");
+            assert.equal(strftime(date, "%F %T %z", {tz: "utc"}), "2018-06-15 12:30:00 +0000");
             assert.equal(strftime(date, "%F %T %z", {tz: +300}), "2018-06-15 17:30:00 +0500");
             assert.equal(strftime(date, "%F %T %z", {tz: -300}), "2018-06-15 07:30:00 -0500");
             assert.equal(strftime(date, "%F %T %z", "UTC"), "2018-06-15 12:30:00 +0000");
@@ -736,7 +741,7 @@ function createTests(strtime){
             assert.equal(strftime(date, "%F %T %z", +120), "2018-06-15 14:30:00 +0200");
             assert.equal(strftime(date, "%F %T %z", -120), "2018-06-15 10:30:00 -0200");
         });
-        this.test("write with explicit timezone overrides 'Z' ending", function(){
+        this.test("write with explicit timezone ignores 'Z' (Zulu) ending", function(){
             assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ"), "2018-01-01T00:00:00Z");
             assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ", {tz: +2}), "2018-01-01T02:00:00Z");
         });
@@ -748,10 +753,14 @@ function createTests(strtime){
                 return true;
             });
         });
+        this.test("parse assuming the default timezone (UTC)", function(){
+            assert.deepStrictEqual(strptime("2018-06-15 12:30:00", "%F %T"), date);
+        });
         this.test("parse assuming a certain timezone when none is in the timestamp", function(){
             const ts = "2018-08-15 12:30:00";
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: 0}), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: "UTC"}), new Date("2018-08-15T12:30:00Z"));
+            assert.deepStrictEqual(strptime(ts, "%F %T", {tz: "utc"}), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: +60}), new Date("2018-08-15T11:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: -60}), new Date("2018-08-15T13:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: +2.5}), new Date("2018-08-15T10:00:00Z"));
@@ -759,7 +768,7 @@ function createTests(strtime){
             assert.deepStrictEqual(strptime(ts, "%F %T", 0), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", "UTC"), new Date("2018-08-15T12:30:00Z"));
         });
-        this.test("parse with explicit timezone overrides 'Z' ending", function(){
+        this.test("parse with explicit timezone ignores 'Z' (Zulu) ending", function(){
             assert(strptime("2018-01-01T04:00:00Z", "%FT%TZ").getUTCHours() === 4);
             assert(strptime("2018-01-01T04:00:00Z", "%FT%TZ", {tz: +2}).getUTCHours() === 2);
         });
