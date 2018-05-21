@@ -33,7 +33,7 @@ function getFormatOptions(timezone, options){
 
 function getTimezoneOffsetMinutes(date, tz){
     if(tz === null || tz === undefined){
-        return undefined;
+        return 0;
     }else if(tz >= -16 && tz <= +16){
         return Math.floor(60 * tz);
     }else if(Number.isFinite(tz)){
