@@ -60,11 +60,8 @@ console.log(date.toISOString());
 
 ### Timezone output with strftime
 
-The **strftime** function uses the inputted Date object's local timezone offset by
-default.
-This behavior changes when the timestamp ends with a Zulu indicator ("Z"),
-for example in `%Y-%m-%dT%H:%M%SZ`; in this case it defaults to using UTC.
-You can specify which timezone should be used by passing it as an argument. Timezones are accepted as numeric offsets or as abbreviations such as `UTC` or `EDT` or `EEST`. Offsets between and including -16 and +16 are interpreted as hour offsets. Other offset values are interpreted as minute offsets.
+The **strftime** function defaults to writing a UTC timestamp.
+You can specify which timezone should be used by passing it as an argument. Timezones are accepted as numeric offsets or as abbreviations such as `UTC` or `EDT` or `EEST`. Offsets between and including -16 and +16 are interpreted as hour offsets. Other offset values are interpreted as minute offsets. You can also use the string `local` to use the local timezone.
 
 ``` js
 // Prints e.g. "2000-01-01 14:00:00 GMT+0200"
@@ -79,12 +76,9 @@ console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z"
 
 ### Timezone assumption with strptime
 
-The **strptime** function assumes that a timestamp represents a date in the local
-timezone if no timezone is specified in that timestamp.
-Timestamps ending with a Zulu indicator ("Z"), for example in `%Y-%m-%dT%H:%M%SZ`,
-are assumed to be UTC.
+The **strptime** function assumes that a timestamp represents a UTC date if no timezone is specified in that timestamp.
 You can specify what timezone should be assumed for timestamps which do not
-contain an explicit timezone by passing it as an argument.
+contain an explicit timezone by passing it as an argument. The strptime function accepts timezones arguments in the same way that strftime does.
 
 ``` js
 // Prints e.g. "2000-01-01T10:00:00.000Z" - due to the local offset of GMT+0200

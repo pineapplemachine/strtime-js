@@ -43,6 +43,7 @@ function createTests(strtime){
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 17}), "%a"), "Thu");
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 18}), "%a"), "Fri");
                 assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 19}), "%a"), "Sat");
+                assert.equal(strftime(getUTCDate({year: 2018, month: 5, day: 19}), "%^a"), "SAT");
             });
             this.test("parse", function(){
                 assert.deepStrictEqual(strptime("2018-W20-Fri", "%G-W%V-%a", {tz: 0}), getUTCDate({year: 2018, month: 5, day: 18}));
@@ -133,7 +134,7 @@ function createTests(strtime){
         this.group("Century number %C", function(){
             this.test("format", function(){
                 assert.equal(strftime(new Date("2000-06-15"), "%C"), "20");
-                assert.equal(strftime(getDate({year: -2000}), "%C"), "-20");
+                assert.equal(strftime(getUTCDate({year: -2000}), "%C"), "-20");
             });
             this.test("parse", function(){
                 assert.equal(strptime("20", "%C").getFullYear(), 2000);
@@ -211,7 +212,11 @@ function createTests(strtime){
         this.group("Full ISO week year %G", function(){
             this.test("format", function(){
                 assert.equal(strftime(new Date("2000-06-15"), "%G"), "2000");
-                assert.equal(strftime(getDate({year: -2000, month: 6}), "%G"), "-2000");
+                assert.equal(strftime(getUTCDate({year: 200, month: 6}), "%G"), "0200");
+                assert.equal(strftime(getUTCDate({year: -2000, month: 6}), "%G"), "-2000");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%G"), "-0029");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%_G"), " -29");
+                assert.equal(strftime(getUTCDate({year: -0029, month: 6}), "%-G"), "-29");
             });
             this.test("parse", function(){
                 assert.equal(strptime("2000-W10", "%G-W%V").getFullYear(), 2000);
@@ -498,7 +503,11 @@ function createTests(strtime){
         this.group("Full year %Y", function(){
             this.test("format", function(){
                 assert.equal(strftime(new Date("2000-06-15"), "%Y"), "2000");
-                assert.equal(strftime(getDate({year: -2000}), "%Y"), "-2000");
+                assert.equal(strftime(getUTCDate({year: -2000}), "%Y"), "-2000");
+                assert.equal(strftime(getUTCDate({year: -59}), "%Y"), "-0059");
+                assert.equal(strftime(getUTCDate({year: -59}), "%_Y"), " -59");
+                assert.equal(strftime(getUTCDate({year: -59}), "%-Y"), "-59");
+                assert.equal(strftime(getUTCDate({year: -59}), "%^Y"), "60");
             });
             this.test("parse", function(){
                 assert.equal(strptime("2000", "%Y").getFullYear(), 2000);
@@ -544,7 +553,9 @@ function createTests(strtime){
                 assert.equal(strptime("12:00 +01:00", "%H:%M %Z").getUTCMinutes(), 0);
                 assert.equal(strptime("12:00 Z", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 UTC", "%H:%M %Z").getUTCHours(), 12);
+                assert.equal(strptime("12:00 utc", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 EDT", "%H:%M %Z").getUTCHours(), 16); // -4
+                assert.equal(strptime("12:00 edt", "%H:%M %Z").getUTCHours(), 16); // -4
                 assert.equal(strptime("12:00 EEST", "%H:%M %Z").getUTCHours(), 9); // +3
                 assert.equal(strptime("12:00 ACDT", "%H:%M %Z").getUTCHours(), 1); // +10.5
                 assert.equal(strptime("12:00 ACDT", "%H:%M %Z").getUTCMinutes(), 30);
@@ -601,11 +612,7 @@ function createTests(strtime){
     });
     
     canary.group("common timestamp formats", function(){
-        const date = getDate({
-            year: 2018, month: 5, day: 4,
-            hour: 22, minute: 15, second: 30,
-            millisecond: 0,
-        });
+        const date = new Date("2018-05-04T22:15:30.000Z");
         this.test("write common formats", function(){
             assert.equal(strftime(date, "%F %T"), "2018-05-04 22:15:30");
             assert.equal(strftime(date, "%Y-%m-%d %H:%M:%S"), "2018-05-04 22:15:30");
@@ -625,7 +632,7 @@ function createTests(strtime){
     });
     
     canary.group("potentially ambiguous number formats", function(){
-        const date = getDate({year: 2018, month: 5, day: 4});
+        const date = new Date("2018-05-04");
         this.test("write potentially ambiguous formats", function(){
             assert.equal(strftime(date, "%Y%m%d"), "20180504");
             assert.equal(strftime(date, "%Y%-m%-d"), "201854");
@@ -714,7 +721,10 @@ function createTests(strtime){
     
     canary.group("providing an explicit timezone option", function(){
         const date = new Date("2018-06-15T12:30:00Z");
-        this.test("write using the default timezone (local)", function(){
+        this.test("write using the default timezone (UTC)", function(){
+            assert.equal(strftime(date, "%F %T %z"), "2018-06-15 12:30:00 +0000");
+        });
+        this.test("write using the local timezone", function(){
             const localTimezoneOffset = -(date.getTimezoneOffset());
             const absOffset = Math.abs(localTimezoneOffset);
             const tzSign = localTimezoneOffset >= 0 ? "+" : "-";
@@ -724,11 +734,12 @@ function createTests(strtime){
                 (tzHours >= 10 ? tzHours : `0${tzHours}`) +
                 (tzMinutes >= 10 ? tzMinutes : `0${tzMinutes}`)
             );
-            assert.equal(strftime(date, "%z"), tzString); // e.g. "+0200"
+            assert.equal(strftime(date, "%z", "local"), tzString); // e.g. "+0200"
         });
         this.test("write with a specific timezone", function(){
             assert.equal(strftime(date, "%F %T %z", {tz: 0}), "2018-06-15 12:30:00 +0000");
             assert.equal(strftime(date, "%F %T %z", {tz: "UTC"}), "2018-06-15 12:30:00 +0000");
+            assert.equal(strftime(date, "%F %T %z", {tz: "utc"}), "2018-06-15 12:30:00 +0000");
             assert.equal(strftime(date, "%F %T %z", {tz: +300}), "2018-06-15 17:30:00 +0500");
             assert.equal(strftime(date, "%F %T %z", {tz: -300}), "2018-06-15 07:30:00 -0500");
             assert.equal(strftime(date, "%F %T %z", "UTC"), "2018-06-15 12:30:00 +0000");
@@ -740,7 +751,7 @@ function createTests(strtime){
             assert.equal(strftime(date, "%F %T %z", +120), "2018-06-15 14:30:00 +0200");
             assert.equal(strftime(date, "%F %T %z", -120), "2018-06-15 10:30:00 -0200");
         });
-        this.test("write with explicit timezone overrides 'Z' ending", function(){
+        this.test("write with explicit timezone ignores 'Z' (Zulu) ending", function(){
             assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ"), "2018-01-01T00:00:00Z");
             assert.equal(strftime(new Date("2018-01-01"), "%FT%TZ", {tz: +2}), "2018-01-01T02:00:00Z");
         });
@@ -752,10 +763,14 @@ function createTests(strtime){
                 return true;
             });
         });
+        this.test("parse assuming the default timezone (UTC)", function(){
+            assert.deepStrictEqual(strptime("2018-06-15 12:30:00", "%F %T"), date);
+        });
         this.test("parse assuming a certain timezone when none is in the timestamp", function(){
             const ts = "2018-08-15 12:30:00";
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: 0}), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: "UTC"}), new Date("2018-08-15T12:30:00Z"));
+            assert.deepStrictEqual(strptime(ts, "%F %T", {tz: "utc"}), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: +60}), new Date("2018-08-15T11:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: -60}), new Date("2018-08-15T13:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", {tz: +2.5}), new Date("2018-08-15T10:00:00Z"));
@@ -763,7 +778,7 @@ function createTests(strtime){
             assert.deepStrictEqual(strptime(ts, "%F %T", 0), new Date("2018-08-15T12:30:00Z"));
             assert.deepStrictEqual(strptime(ts, "%F %T", "UTC"), new Date("2018-08-15T12:30:00Z"));
         });
-        this.test("parse with explicit timezone overrides 'Z' ending", function(){
+        this.test("parse with explicit timezone ignores 'Z' (Zulu) ending", function(){
             assert(strptime("2018-01-01T04:00:00Z", "%FT%TZ").getUTCHours() === 4);
             assert(strptime("2018-01-01T04:00:00Z", "%FT%TZ", {tz: +2}).getUTCHours() === 2);
         });
@@ -934,14 +949,14 @@ function createTests(strtime){
         });
         this.test("strftime accepts dayjs inputs", function(){
             const date = dayjs('2018-08-08');
-            assert.equal(strftime(date, "%F %T"), "2018-08-08 00:00:00");
+            assert.equal(strftime(date, "%F %T", "local"), "2018-08-08 00:00:00");
         });
         this.test("strftime accepts luxon inputs", function(){
-            const date = luxon.DateTime.local(2017, 5, 15);
+            const date = luxon.DateTime.utc(2017, 5, 15);
             assert.equal(strftime(date, "%F %T"), "2017-05-15 00:00:00");
         });
         this.test("strftime accepts moment inputs", function(){
-            const date = moment('1995-12-25');
+            const date = moment.utc('1995-12-25');
             assert.equal(strftime(date, "%F %T"), "1995-12-25 00:00:00");
         });
         this.test("strftime throws an error for null and undefined inputs", function(){

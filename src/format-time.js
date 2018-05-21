@@ -33,18 +33,23 @@ function getFormatOptions(timezone, options){
 
 function getTimezoneOffsetMinutes(date, tz){
     if(tz === null || tz === undefined){
-        return undefined;
+        return 0;
     }else if(tz >= -16 && tz <= +16){
         return Math.floor(60 * tz);
     }else if(Number.isFinite(tz)){
         return Math.floor(tz);
     }else if(tz === "local"){
-        return -(date || new Date()).getTimezoneOffset()
-    }else if(tz in defaultTimezoneNames){
-        return Math.floor(60 * defaultTimezoneNames[tz]);
+        return -(date || new Date()).getTimezoneOffset();
     }else{
-        throw new Error(`Unrecognized timezone option "${tz}".`);
+        const tzUpper = String(tz).toUpperCase();
+        if(tzUpper in defaultTimezoneNames){
+            const offset = Math.floor(60 * defaultTimezoneNames[tzUpper]);
+            if(Number.isFinite(offset)){
+                return offset;
+            }
+        }
     }
+    throw new Error(`Unrecognized timezone option "${tz}".`);
 }
 
 function strftime(date, format, timezone, options){
@@ -71,13 +76,7 @@ function strftime(date, format, timezone, options){
     if(timezoneOffsetMinutes !== undefined){
         tzDate.setUTCMinutes(
             date.getUTCMinutes() +
-            date.getTimezoneOffset() +
             timezoneOffsetMinutes
-        );
-    }else if(tokens.zuluTimezone){
-        tzDate.setUTCMinutes(
-            date.getUTCMinutes() +
-            date.getTimezoneOffset()
         );
     }
     let output = "";
@@ -99,8 +98,6 @@ function strptime(timestamp, format, timezone, options){
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(undefined, useOptions.tz);
     if(timezoneOffsetMinutes !== undefined){
         parser.timezoneOffsetMinutes = timezoneOffsetMinutes;
-    }else if(parser.tokens.zuluTimezone){
-        parser.timezoneOffsetMinutes = 0;
     }
     if(useOptions.options){
         for(let key in useOptions.options){
