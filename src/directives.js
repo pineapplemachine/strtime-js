@@ -426,6 +426,7 @@ Directive.list = [
     // Full ISO week year
     new Directive({
         names: ["G"],
+        padLength: 4,
         likelyLength: 4,
         canBeNegative: true,
         store: function(number){
