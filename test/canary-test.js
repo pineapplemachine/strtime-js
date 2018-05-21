@@ -555,6 +555,7 @@ function createTests(strtime){
                 assert.equal(strptime("12:00 UTC", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 utc", "%H:%M %Z").getUTCHours(), 12);
                 assert.equal(strptime("12:00 EDT", "%H:%M %Z").getUTCHours(), 16); // -4
+                assert.equal(strptime("12:00 edt", "%H:%M %Z").getUTCHours(), 16); // -4
                 assert.equal(strptime("12:00 EEST", "%H:%M %Z").getUTCHours(), 9); // +3
                 assert.equal(strptime("12:00 ACDT", "%H:%M %Z").getUTCHours(), 1); // +10.5
                 assert.equal(strptime("12:00 ACDT", "%H:%M %Z").getUTCMinutes(), 30);
