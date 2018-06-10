@@ -1,3 +1,9 @@
+# v1.1.1
+
+Third release. 10 June 2018.
+
+- Fixed readme code example errors. Some code displayed pre-v1.1.0 behavior.
+
 # v1.1.0
 
 Second release. 21 May 2018.
