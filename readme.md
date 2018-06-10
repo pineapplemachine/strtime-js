@@ -64,11 +64,11 @@ The **strftime** function defaults to writing a UTC timestamp.
 You can specify which timezone should be used by passing it as an argument. Timezones are accepted as numeric offsets or as abbreviations such as `UTC` or `EDT` or `EEST`. Offsets between and including -16 and +16 are interpreted as hour offsets. Other offset values are interpreted as minute offsets. You can also use the string `local` to use the local timezone.
 
 ``` js
-// Prints e.g. "2000-01-01 14:00:00 GMT+0200"
+// Prints "2000-01-01 12:00:00 GMT+0000"
 console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z"));
 
-// Prints "2000-01-01 12:00:00 GMT+0000"
-console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z", +0));
+// Prints "2000-01-01 14:00:00 GMT+0200"
+console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z", +2));
 
 // Prints "2000-01-01 08:00:00 GMT-0400"
 console.log(strftime(new Date("2000-01-01T12:00:00Z"), "%Y-%m-%d %H:%M:%S GMT%z", "EDT"));
@@ -81,12 +81,12 @@ You can specify what timezone should be assumed for timestamps which do not
 contain an explicit timezone by passing it as an argument. The strptime function accepts timezones arguments in the same way that strftime does.
 
 ``` js
-// Prints e.g. "2000-01-01T10:00:00.000Z" - due to the local offset of GMT+0200
+// Prints e.g. "2000-01-01T12:00:00.000Z"
 const date = strptime("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S");
 console.log(date.toISOString());
 
-// Prints "2000-01-01T12:00:00.000Z"
-const date = strptime("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S", +0);
+// Prints "2000-01-01T10:00:00.000Z" due to the +2 hours offset
+const date = strptime("2000-01-01 12:00:00", "%Y-%m-%d %H:%M:%S", +2);
 console.log(date.toISOString());
 ```
 
@@ -113,5 +113,7 @@ const monthNames = [
 ];
 
 // Prints "1 enero 2000"
-console.log(strftime(new Date("2000-01-01"), "%-d %B %Y", +0, {longMonthNames: monthNames}));
+console.log(strftime(new Date("2000-01-01"), "%-d %B %Y", +0, {
+    longMonthNames: monthNames
+}));
 ```
