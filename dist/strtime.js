@@ -30,20 +30,94 @@ function getFormatOptions(timezone, options){
     };
 }
 
+function getDateTimeFormat(tz){
+    return new Intl.DateTimeFormat("en-US", {
+        hour12: false,
+        timeZone: tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    });
+}
+
+function parseDateTimeFormatString(string){
+    const month = +string.slice(0, 2);
+    const day = +string.slice(3, 5);
+    const year = +string.slice(6, string.length - 10);
+    const hour = +string.slice(string.length - 8, string.length - 6);
+    const minute = +string.slice(string.length - 5, string.length - 3);
+    const second = +string.slice(string.length - 2, string.length);
+    const utcDate = new Date();
+    utcDate.setUTCFullYear(year);
+    utcDate.setUTCMonth(month - 1);
+    utcDate.setUTCDate(day);
+    utcDate.setUTCHours(hour);
+    utcDate.setUTCMinutes(minute);
+    utcDate.setUTCSeconds(second);
+    return utcDate;
+}
+
+function getTimezoneOffsetAtIANADate(tz, date){
+    // Get the offset as though the input date was UTC
+    const format = getDateTimeFormat(tz);
+    const timestamp = format.format(date);
+    const parsedDate = parseDateTimeFormatString(timestamp);
+    parsedDate.setUTCMilliseconds(date.getUTCMilliseconds());
+    const probableOffset = (parsedDate.getTime() - date.getTime()) / 60000;
+    // If this offset is correct (and it *probably* is) then this is
+    // the UTC date corresponding to the date input
+    const probableDate = new Date(date);
+    probableDate.setUTCMinutes(probableDate.getUTCMinutes() - probableOffset);
+    // See whether reversing the operation gives the input date
+    const checkTimestamp = format.format(probableDate);
+    const checkedDate = parseDateTimeFormatString(checkTimestamp);
+    checkedDate.setUTCMilliseconds(date.getUTCMilliseconds());
+    // This offset will be 0 if probableOffset was correct, otherwise it
+    // will be the number of minutes that the offset was off by.
+    const checkOffset = (checkedDate.getTime() - date.getTime()) / 60000;
+    return probableOffset + checkOffset;
+}
+
+function getTimezoneOffsetAtUTCDate(tz, date){
+    const format = getDateTimeFormat(tz);
+    const timestamp = format.format(date);
+    const parsedDate = parseDateTimeFormatString(timestamp);
+    parsedDate.setUTCMilliseconds(date.getUTCMilliseconds());
+    const offset = parsedDate.getTime() - date.getTime();
+    return offset / 60000; // millseconds => minutes
+}
+
 function getTimezoneOffsetMinutes(date, tz){
     if(tz === null || tz === undefined){
-        return undefined;
+        return 0;
     }else if(tz >= -16 && tz <= +16){
         return Math.floor(60 * tz);
     }else if(Number.isFinite(tz)){
         return Math.floor(tz);
     }else if(tz === "local"){
-        return -(date || new Date()).getTimezoneOffset()
-    }else if(tz in defaultTimezoneNames){
-        return Math.floor(60 * defaultTimezoneNames[tz]);
+        return -(date || new Date()).getTimezoneOffset();
     }else{
-        throw new Error(`Unrecognized timezone option "${tz}".`);
+        const tzString = String(tz);
+        if(tzString.startsWith("Etc/GMT")){
+            const offset = +tzString.slice(7);
+            if(Number.isInteger(offset)) return 60 * -offset;
+        }else if(typeof(Intl) !== "undefined" && tzString.indexOf("/") >= 0){
+            return {
+                formatOffset: date => getTimezoneOffsetAtUTCDate(tz, date),
+                parseOffset: date => getTimezoneOffsetAtIANADate(tz, date),
+            };
+        }else{
+            const tzUpper = String(tz).toUpperCase();
+            if(tzUpper in defaultTimezoneNames){
+                const offset = Math.floor(60 * defaultTimezoneNames[tzUpper]);
+                if(Number.isFinite(offset)) return offset;
+            }
+        }
     }
+    throw new Error(`Unrecognized timezone option "${tz}".`);
 }
 
 function strftime(date, format, timezone, options){
@@ -63,20 +137,17 @@ function strftime(date, format, timezone, options){
     if(!(date instanceof Date)){
         throw new Error("Failed to get Date instance from date input.");
     }
+    if(!Number.isFinite(date.getTime())){
+        throw new Error("Can't format an invalid date.");
+    }
     const tokens = TimestampParser.parseFormatString(format);
     const useOptions = getFormatOptions(timezone, options);
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(date, useOptions.tz);
     const tzDate = new Date(date);
-    if(timezoneOffsetMinutes !== undefined){
+    if(Number.isFinite(timezoneOffsetMinutes)){
         tzDate.setUTCMinutes(
             date.getUTCMinutes() +
-            date.getTimezoneOffset() +
             timezoneOffsetMinutes
-        );
-    }else if(tokens.zuluTimezone){
-        tzDate.setUTCMinutes(
-            date.getUTCMinutes() +
-            date.getTimezoneOffset()
         );
     }
     let output = "";
@@ -98,8 +169,6 @@ function strptime(timestamp, format, timezone, options){
     const timezoneOffsetMinutes = getTimezoneOffsetMinutes(undefined, useOptions.tz);
     if(timezoneOffsetMinutes !== undefined){
         parser.timezoneOffsetMinutes = timezoneOffsetMinutes;
-    }else if(parser.tokens.zuluTimezone){
-        parser.timezoneOffsetMinutes = 0;
     }
     if(useOptions.options){
         for(let key in useOptions.options){
@@ -175,9 +244,9 @@ function writeTimezoneOffset(offsetMinutes, modifier){
 // https://www.quora.com/How-does-Tomohiko-Sakamotos-Algorithm-work/answer/Raziman-T-V?srid=u2HNX
 function getDayOfWeek(date){
     const offsets = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
-    let year = date.getFullYear();
-    let month = date.getMonth();
-    let day = date.getDate();
+    let year = date.getUTCFullYear();
+    let month = date.getUTCMonth();
+    let day = date.getUTCDate();
     if(month < 2){
         year--;
     }
@@ -191,14 +260,17 @@ function getDayOfWeek(date){
 
 // Get the day of the year as a number (1-366)
 function getDayOfYear(date){
-    const months = monthLengths.forYear(date.getFullYear()).slice(0, date.getMonth());
-    return date.getDate() + ((months.length && months.reduce((a, b) => a + b)) || 0);
+    const lengths = monthLengths.forYear(date.getUTCFullYear());
+    const months = lengths.slice(0, date.getUTCMonth());
+    return date.getUTCDate() + (
+        (months.length && months.reduce((a, b) => a + b)) || 0
+    );
 }
 
 // Get the week of the year (starting with Sunday) (0-53)
 function getWeekOfYearFromSunday(date){
     const dayOfYear = getDayOfYear(date);
-    const firstDayOfWeek = getFirstWeekdayInYear(date.getFullYear());
+    const firstDayOfWeek = getFirstWeekdayInYear(date.getUTCFullYear());
     return Math.floor((dayOfYear + (firstDayOfWeek || 7) - 1) / 7);
 }
 
@@ -206,7 +278,7 @@ function getWeekOfYearFromSunday(date){
 function getWeekOfYearFromMonday(date){
     const dayOfYear = getDayOfYear(date);
     const dayOfWeek = getDayOfWeek(date);
-    const firstDayOfWeek = getFirstWeekdayInYear(date.getFullYear());
+    const firstDayOfWeek = getFirstWeekdayInYear(date.getUTCFullYear());
     const sundayWeek = Math.floor((dayOfYear + (firstDayOfWeek || 7) - 1) / 7);
     return sundayWeek - (dayOfWeek === 0 ? 1 : 0) + (firstDayOfWeek === 1 ? 1 : 0);
 }
@@ -230,7 +302,7 @@ function getISOWeeksInYear(year){
 // https://en.wikipedia.org/wiki/ISO_week_date
 // https://en.wikipedia.org/wiki/ISO_8601#Week_dates
 function getISOWeekOfYear(date){
-    const year = date.getFullYear();
+    const year = date.getUTCFullYear();
     const dayOfYear = getDayOfYear(date);
     const dayOfWeek = getDayOfWeek(date);
     const weekNumber = Math.floor((10 + dayOfYear - (dayOfWeek || 7)) / 7);
@@ -245,7 +317,7 @@ function getISOWeekOfYear(date){
 
 // https://en.wikipedia.org/wiki/ISO_week_date
 function getISOWeekDateYear(date){
-    const year = date.getFullYear();
+    const year = date.getUTCFullYear();
     const dayOfYear = getDayOfYear(date);
     const dayOfWeek = getDayOfWeek(date);
     const weekNumber = Math.floor((10 + dayOfYear - (dayOfWeek || 7)) / 7);
@@ -438,7 +510,7 @@ Directive.list = [
             const names = ((options && options.shortWeekdayNames) ||
                 english.shortWeekdayNames
             );
-            return names[date.getDay() % 7];
+            return names[date.getUTCDay() % 7];
         },
     }),
     // Long weekday name
@@ -452,7 +524,7 @@ Directive.list = [
             const names = ((options && options.longWeekdayNames) ||
                 english.longWeekdayNames
             );
-            return names[date.getDay() % 7];
+            return names[date.getUTCDay() % 7];
         },
     }),
     // Abbreviated month name
@@ -466,7 +538,7 @@ Directive.list = [
             const names = ((options && options.shortMonthNames) ||
                 english.shortMonthNames
             );
-            return names[date.getMonth() % 12];
+            return names[date.getUTCMonth() % 12];
         },
     }),
     // Long month name
@@ -480,7 +552,7 @@ Directive.list = [
             const names = ((options && options.longMonthNames) ||
                 english.longMonthNames
             );
-            return names[date.getMonth() % 12];
+            return names[date.getUTCMonth() % 12];
         },
     }),
     // Combination date and time, same as "%a %b %e %H:%M:%S %Y"
@@ -497,7 +569,7 @@ Directive.list = [
             this.century = number;
         },
         write: function(date){
-            return Math.floor(date.getFullYear() / 100);
+            return Math.floor(date.getUTCFullYear() / 100);
         },
     }),
     // Two-digit day of month
@@ -511,7 +583,7 @@ Directive.list = [
             this.dayOfMonth = number;
         },
         write: function(date){
-            return date.getDate();
+            return date.getUTCDate();
         },
     }),
     // Same as %m/%d/%y
@@ -530,9 +602,9 @@ Directive.list = [
         },
         write: function(date, modifier){
             if(!modifier){
-                return leftPad(" ", 2, date.getDate());
+                return leftPad(" ", 2, date.getUTCDate());
             }else{
-                return date.getDate();
+                return date.getUTCDate();
             }
         },
     }),
@@ -547,7 +619,7 @@ Directive.list = [
             this.microsecond = number;
         },
         write: function(date){
-            return 1000 * date.getMilliseconds();
+            return 1000 * date.getUTCMilliseconds();
         },
     }),
     // Same as %Y-%m-%d
@@ -569,6 +641,7 @@ Directive.list = [
     // Full ISO week year
     new Directive({
         names: ["G"],
+        padLength: 4,
         likelyLength: 4,
         canBeNegative: true,
         store: function(number){
@@ -589,7 +662,7 @@ Directive.list = [
             this.hour = number;
         },
         write: function(date){
-            return date.getHours();
+            return date.getUTCHours();
         },
     }),
     // Two-digit hour (1-12) to be used in combination with %p (AM/PM)
@@ -603,7 +676,7 @@ Directive.list = [
             this.hour = number;
         },
         write: function(date){
-            return (date.getHours() % 12) || 12;
+            return (date.getUTCHours() % 12) || 12;
         },
     }),
     // Day in year
@@ -631,7 +704,7 @@ Directive.list = [
             this.millisecond = number;
         },
         write: function(date){
-            return date.getMilliseconds();
+            return date.getUTCMilliseconds();
         },
     }),
     // Two-digit month number (1-12)
@@ -645,7 +718,7 @@ Directive.list = [
             this.month = number;
         },
         write: function(date){
-            return 1 + date.getMonth();
+            return 1 + date.getUTCMonth();
         },
     }),
     // Two-digit minute (0-59)
@@ -659,7 +732,7 @@ Directive.list = [
             this.minute = number;
         },
         write: function(date){
-            return date.getMinutes();
+            return date.getUTCMinutes();
         },
     }),
     // AM or PM (uppercase)
@@ -670,7 +743,7 @@ Directive.list = [
             this.meridiem = this.parseMeridiemName();
         },
         write: function(date, modifier, options){
-            const index = date.getHours() < 12 ? 0 : 1;
+            const index = date.getUTCHours() < 12 ? 0 : 1;
             return (
                 (options && options.meridiemNames) || english.meridiemNames
             )[index];
@@ -685,7 +758,7 @@ Directive.list = [
             this.meridiem = this.parseMeridiemName();
         },
         write: function(date, modifier, options){
-            const index = date.getHours() < 12 ? 0 : 1;
+            const index = date.getUTCHours() < 12 ? 0 : 1;
             return (
                 (options && options.meridiemNames) || english.meridiemNames
             )[index].toLowerCase();
@@ -699,9 +772,7 @@ Directive.list = [
             this.microsecondsSinceEpoch = number;
         },
         write: function(date){
-            // getTime is relative to UTC; result needs to be local
-            const time = date.getTime() - 60000 * date.getTimezoneOffset();
-            return Math.floor(time * 1000);
+            return Math.floor(date.getTime() * 1000);
         },
     }),
     // Same as "%I:%M:%S %p"
@@ -722,9 +793,7 @@ Directive.list = [
             this.secondsSinceEpoch = number;
         },
         write: function(date){
-            // getTime is relative to UTC; result needs to be local
-            const time = date.getTime() - 60000 * date.getTimezoneOffset();
-            return Math.floor(time / 1000);
+            return Math.floor(date.getTime() / 1000);
         },
     }),
     // Two-digit second (0-61)
@@ -738,7 +807,7 @@ Directive.list = [
             this.second = number;
         },
         write: function(date){
-            return Math.min(59, date.getSeconds());
+            return Math.min(59, date.getUTCSeconds());
         },
     }),
     // Same as %H:%M:%S
@@ -828,7 +897,7 @@ Directive.list = [
             this.twoDigitYear = number;
         },
         write: function(date){
-            return date.getFullYear() % 100;
+            return date.getUTCFullYear() % 100;
         },
     }),
     // Full year (usually four-digit, but not strictly so)
@@ -841,7 +910,7 @@ Directive.list = [
             this.year = number;
         },
         write: function(date, modifier){
-            const year = date.getFullYear();
+            const year = date.getUTCFullYear();
             // Modifier "^" produces unsigned year, for combination with era "%#"
             if(year <= 0 && modifier === "^") return 1 - year;
             else return year;
@@ -896,7 +965,7 @@ Directive.list = [
             this.era = this.parseEraName();
         },
         write: function(date, modifier, options){
-            const index = date.getFullYear() <= 0 ? 1 : 0;
+            const index = date.getUTCFullYear() <= 0 ? 1 : 0;
             return (
                 (options && options.eraNames) || english.eraNames
             )[index];

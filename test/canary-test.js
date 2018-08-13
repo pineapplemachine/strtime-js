@@ -1,10 +1,6 @@
 const assert = require("assert").strict;
 const canary = require("canary-test").Group("strtime");
 
-const moment = require("moment");
-const luxon = require("luxon");
-const dayjs = require("dayjs");
-
 function getDate(options){
     const date = new Date();
     date.setFullYear(options.year !== undefined ? options.year : 2000);
@@ -943,12 +939,15 @@ function createTests(strtime){
     });
     
     canary.group("strftime inputs other than Date objects", function(){
+        const dayjs = require("dayjs");
+        const luxon = require("luxon");
+        const moment = require("moment");
         this.test("strftime accepts a UTC unix timestamp", function(){
             const date = 1526601600000; // milliseconds since epoch
             assert.equal(strftime(date, "%F %T", {tz: 0}), "2018-05-18 00:00:00");
         });
         this.test("strftime accepts dayjs inputs", function(){
-            const date = dayjs('2018-08-08');
+            const date = dayjs("2018-08-08");
             assert.equal(strftime(date, "%F %T", "local"), "2018-08-08 00:00:00");
         });
         this.test("strftime accepts luxon inputs", function(){
@@ -956,7 +955,7 @@ function createTests(strtime){
             assert.equal(strftime(date, "%F %T"), "2017-05-15 00:00:00");
         });
         this.test("strftime accepts moment inputs", function(){
-            const date = moment.utc('1995-12-25');
+            const date = moment.utc("1995-12-25");
             assert.equal(strftime(date, "%F %T"), "1995-12-25 00:00:00");
         });
         this.test("strftime throws an error for null and undefined inputs", function(){
