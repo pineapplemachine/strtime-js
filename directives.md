@@ -8,7 +8,7 @@ Directives can be modified using special characters.
 An unmodified directive looks like `%d`. A modified directive looks like `%-d` or `%_d` or `%:d` or `%^B`.
 
 - `-` Don't pad; i.e. produce `1` when normally `01` would be produced.
-- `_` Pad with spaces; i.e. produce ` 1` instead of `01`.
+- `_` Pad with spaces; i.e. produce ` 1` instead of `01`.
 - `^` Switch case (make lowercase if fully upper, uppercase otherwise), or unsigned year %Y for use with era.
 - `:` Timezone with ':' delimiter e.g. "+00:00", or number with ordinal e.g. "1st".
 
@@ -229,7 +229,7 @@ This directive literally writes the newline character `\n` when formatting a dat
 
 Uppercase AM/PM text. Using the default English settings these strings are "AM" for times before noon and "PM" for noon and times after noon but before midnight. Normally, this directive is used in combination with the 12-hour hour number directive `%I`.
 
-The AM/PM strings can be changed by passing an options object to **strftime** or **strptime** which includes a `meridiemNames` attribute. The value of this attribute must be an array two elements, an AM equivalent and then a PM equivalent. The strings given here are written with their original capitalization when using this `%p` directive.
+The AM/PM strings can be changed by passing an options object to **strftime** or **strptime** which includes a `meridiemNames` attribute. The value of this attribute must be an array containing two elements, an AM equivalent and then a PM equivalent. The strings given here are written with their original capitalization when using this `%p` directive.
 
 The modified directive `%^p` produces switched-case outputs. With the default English settings, this means the output will be "am" or "pm". Note that, with the default English settings, this is the same result as using the lowercase am/pm `%P` directive.
 
@@ -239,7 +239,7 @@ The `%p` directive, when used in a format for **strptime**, is also able to pars
 
 Lowercase am/pm text. Using the default English settings these strings are "am" for times before noon and "pm" for noon and times after noon but before midnight. Normally, this directive is used in combination with the 12-hour hour number directive `%I`.
 
-The am/pm strings can be changed by passing an options object to **strftime** or **strptime** which includes a `meridiemNames` attribute. The value of this attribute must be an array two elements, an AM equivalent and then a PM equivalent. The strings given here are written after conversion to lowercase when using this `%P` directive.
+The am/pm strings can be changed by passing an options object to **strftime** or **strptime** which includes a `meridiemNames` attribute. The value of this attribute must be an array containing two elements, an AM equivalent and then a PM equivalent. The strings given here are written after conversion to lowercase when using this `%P` directive.
 
 The modified directive `%^P` produces switched-case outputs. With the default English settings, this means the output will be "AM" or "PM". Note that, with the default English settings, this is the same result as using the uppercase AM/PM `%p` directive.
 
@@ -345,7 +345,7 @@ Full calendar year number. The number is padded with zeroes if it is fewer than 
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
-Negative year numbers are also padded to four digits, e.g. `-0099` when the calendar year number was -99 and the number was zero-padded or ` -99` when the number was space-padded.
+Negative year numbers are also padded to four digits, e.g. `-0099` when the calendar year number was -99 and the number was zero-padded or ` -99` when the number was space-padded.
 
 The full calendar year can also be made unsigned using the `^` modifier, i.e. `%^Y`. This is intended to be used in combination with the era directive `%#`, such that a calendar year of 0 produces outputs like `1 BCE` and a calendar year of -99 produces outputs like `100 BCE`. Note that this seemingly off-by-one scheme conforms to the [ISO 8601 standard](https://en.wikipedia.org/wiki/Year_zero#ISO_8601), in which year zero represents 1 BCE.
 
