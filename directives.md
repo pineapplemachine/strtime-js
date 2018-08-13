@@ -179,13 +179,13 @@ This directive is identical to the [abbreviated month name `%b` directive](#user
 
 ### Hour number (24-hour) %H
 
-Hour number on a 24-hour clock. The number is padded with spaces if it is fewer than two digits long. The hour number is always in the range 00 through 23.
+Hour number on a 24-hour clock. The number is padded with zeroes if it is fewer than two digits long. The hour number is always in the range 00 through 23.
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
 ### Hour number (12-hour) %I
 
-Hour number on a 12-hour clock. The number is padded with spaces if it is fewer than two digits long. The hour number is always in the range 01 through 12. Normally, this directive should be used in combination with the AM/PM directive `%p` or `%P`.
+Hour number on a 12-hour clock. The number is padded with zeroes if it is fewer than two digits long. The hour number is always in the range 01 through 12. Normally, this directive should be used in combination with the AM/PM directive `%p` or `%P`.
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
@@ -211,13 +211,13 @@ Like other numeric directives, this one can be modified using the no-padding `-`
 
 ### Month number %m
 
-Month number. The number is padded with spaces if it is fewer than two digits long. The month number is always in the range 01 through 12.
+Month number. The number is padded with zeroes if it is fewer than two digits long. The month number is always in the range 01 through 12.
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
 ### Minute %M
 
-Minute number. The number is padded with spaces if it is fewer than two digits long. The minute number is always in the range 00 through 59.
+Minute number. The number is padded with zeroes if it is fewer than two digits long. The minute number is always in the range 00 through 59.
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
@@ -269,7 +269,7 @@ This numeric directive can be modified using the ordinal `:` modifier. However, 
 
 ### Second %S
 
-Second number. The number is padded with spaces if it is fewer than two digits long. The second number is normally in the range 00 through 59 and always in the range 00 through 61.
+Second number. The number is padded with zeroes if it is fewer than two digits long. The second number is normally in the range 00 through 59 and always in the range 00 through 61.
 
 The second number may be 60 in the case of a [leap second](https://en.wikipedia.org/wiki/Leap_second), which occur every few years. The posix standard originally allowed for the possibility of [double leap seconds](https://www.ucolick.org/~sla/leapsecs/onlinebib.html), and this is why a value of 61 is also accepted. However, there have never been two successive leap seconds in the past and this is unlikely to occur in the future.
 
