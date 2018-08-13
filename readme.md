@@ -92,7 +92,7 @@ console.log(date.toISOString());
 
 ### Locale-dependent strings
 
-The **strftime** and **strptime** functions default to english weekday names,
+The **strftime** and **strptime** functions default to English weekday names,
 month names, and ordinals.
 However, it is possible to specify different text by passing an options object.
 

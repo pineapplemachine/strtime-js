@@ -65,7 +65,7 @@ timestamp produced with the output of any other modifier
 - `%Y` full year number
 - `%z` timezone offset, e.g. "+0100"
 - `%Z` timezone name or offset, e.g. "UTC" or "+0100"
-- `%+` date; same as "%a %b %e %H:%M:%S %Z %Y"
+- `%+` date; same as `%a %b %e %H:%M:%S %Z %Y`
 - `%#` era name, i.e. "CE" or "BCE"
 - `%%` literal "%" character
 
@@ -191,7 +191,7 @@ Like other numeric directives, this one can be modified using the no-padding `-`
 
 ### Day of the year %j
 
-Ordinal day number in the year. The number is padded with spaces if it is fewer than three digits long. The day number is always in the range 000 through 366.
+Ordinal day number in the year. The number is padded with zeroes if it is fewer than three digits long. The day number is always in the range 000 through 366.
 
 Like other numeric directives, this one can be modified using the no-padding `-`, space-padding `_`, and ordinal `:` modifiers.
 
