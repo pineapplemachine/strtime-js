@@ -1,3 +1,9 @@
+# v1.1.2
+
+Fourth release. 31 December 2019.
+
+- Workaround for issue related to Date.setUTCMonth causing misbehavior on New Year's Eve.
+
 # v1.1.1
 
 Third release. 10 June 2018.

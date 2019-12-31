@@ -1,6 +1,6 @@
 {
   "name": "strtime",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Comprehensive strftime and strptime implementation.",
   "keywords": [
     "strftime",
