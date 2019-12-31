@@ -202,9 +202,9 @@ class TimestampParser{
             date.setUTCFullYear(this.year);
         }
         if(this.month !== undefined){
-            // Workaround fixes New Year's Eve issue for some reason
             // https://github.com/pineapplemachine/strtime-js/issues/5
-            date.setUTCMonth(1);
+            // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+            date.setUTCMonth(0, 1);
             date.setUTCMonth(this.month - 1);
         }
         if(this.dayOfMonth !== undefined){

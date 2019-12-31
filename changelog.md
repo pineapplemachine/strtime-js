@@ -2,7 +2,7 @@
 
 Fourth release. 31 December 2019.
 
-- Workaround for issue related to Date.setUTCMonth causing misbehavior on New Year's Eve.
+- Fix issue related to calling Date.setUTCMonth on the 31st day of the month.
 
 # v1.1.1
 

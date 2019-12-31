@@ -8,9 +8,9 @@ const dayjs = require("dayjs");
 function getDate(options){
     const date = new Date();
     date.setFullYear(options.year !== undefined ? options.year : 2000);
-    // Workaround fixes New Year's Eve issue for some reason
     // https://github.com/pineapplemachine/strtime-js/issues/5
-    date.setMonth(1);
+    // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+    date.setUTCMonth(0, 1);
     date.setMonth((options.month || 1) - 1);
     date.setDate(options.day || 1);
     date.setHours(options.hour || 0);
@@ -23,9 +23,9 @@ function getDate(options){
 function getUTCDate(options){
     const date = new Date();
     date.setUTCFullYear(options.year !== undefined ? options.year : 2000);
-    // Workaround fixes New Year's Eve issue for some reason
     // https://github.com/pineapplemachine/strtime-js/issues/5
-    date.setUTCMonth(1);
+    // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+    date.setUTCMonth(0, 1);
     date.setUTCMonth((options.month || 1) - 1);
     date.setUTCDate(options.day || 1);
     date.setUTCHours(options.hour || 0);
