@@ -17,8 +17,9 @@ const fs = require("fs");
 const UglifyJS = require("uglify-es");
 
 const sourceDirectoryPath = __dirname + "/../src/";
-const releasePath = __dirname + "/../dist/strtime.js";
-const uglyPath = __dirname + "/../dist/strtime.min.js";
+const distPath = __dirname + "/../dist/";
+const releasePath = distPath + "strtime.js";
+const uglyPath = distPath + "strtime.min.js";
 
 const sourceOrder = [
     "format-time.js",
@@ -52,6 +53,11 @@ for(let sourceFilePath of sourceOrder){
     source += buildSource(fs.readFileSync(path, "utf8").toString());
 }
 source += sourceFooter;
+
+console.log("Ensuring dist/ directory is present.");
+if(!fs.existsSync(distPath)) {
+    fs.mkdirSync(distPath);
+}
 
 console.log("Writing verbose source to dist/ directory.");
 fs.writeFileSync(releasePath, source);

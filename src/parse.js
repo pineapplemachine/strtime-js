@@ -202,6 +202,9 @@ class TimestampParser{
             date.setUTCFullYear(this.year);
         }
         if(this.month !== undefined){
+            // https://github.com/pineapplemachine/strtime-js/issues/5
+            // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+            date.setUTCMonth(0, 1);
             date.setUTCMonth(this.month - 1);
         }
         if(this.dayOfMonth !== undefined){

@@ -1,3 +1,9 @@
+# v1.1.2
+
+Fourth release. 31 December 2019.
+
+- Fix issue related to calling Date.setUTCMonth on the 31st day of the month.
+
 # v1.1.1
 
 Third release. 10 June 2018.

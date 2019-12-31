@@ -8,6 +8,9 @@ const dayjs = require("dayjs");
 function getDate(options){
     const date = new Date();
     date.setFullYear(options.year !== undefined ? options.year : 2000);
+    // https://github.com/pineapplemachine/strtime-js/issues/5
+    // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+    date.setUTCMonth(0, 1);
     date.setMonth((options.month || 1) - 1);
     date.setDate(options.day || 1);
     date.setHours(options.hour || 0);
@@ -20,6 +23,9 @@ function getDate(options){
 function getUTCDate(options){
     const date = new Date();
     date.setUTCFullYear(options.year !== undefined ? options.year : 2000);
+    // https://github.com/pineapplemachine/strtime-js/issues/5
+    // https://stackoverflow.com/questions/26681313/javascript-setutcmonth-does-not-work-for-november
+    date.setUTCMonth(0, 1);
     date.setUTCMonth((options.month || 1) - 1);
     date.setUTCDate(options.day || 1);
     date.setUTCHours(options.hour || 0);
@@ -88,8 +94,19 @@ function createTests(strtime){
             });
             this.test("parse", function(){
                 assert.equal(strptime("1 Jan 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 0);
+                assert.equal(strptime("1 Feb 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 1);
+                assert.equal(strptime("1 Mar 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 2);
+                assert.equal(strptime("1 Apr 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 3);
+                assert.equal(strptime("1 May 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 4);
+                assert.equal(strptime("1 Jun 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 5);
+                assert.equal(strptime("1 Jul 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 6);
+                assert.equal(strptime("1 Aug 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 7);
+                assert.equal(strptime("1 Sep 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 8);
+                assert.equal(strptime("1 Oct 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 9);
+                assert.equal(strptime("1 Nov 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 10);
                 assert.equal(strptime("1 Dec 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 11);
                 assert.equal(strptime("1 January 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 0);
+                assert.equal(strptime("1 November 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 10);
                 assert.equal(strptime("1 December 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 11);
                 assert.equal(strptime("1 APRIL 2018", "%-d %b %Y", {tz: 0}).getUTCMonth(), 3);
             });
@@ -111,8 +128,19 @@ function createTests(strtime){
             });
             this.test("parse", function(){
                 assert.equal(strptime("1 Jan 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 0);
+                assert.equal(strptime("1 Feb 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 1);
+                assert.equal(strptime("1 Mar 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 2);
+                assert.equal(strptime("1 Apr 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 3);
+                assert.equal(strptime("1 May 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 4);
+                assert.equal(strptime("1 Jun 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 5);
+                assert.equal(strptime("1 Jul 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 6);
+                assert.equal(strptime("1 Aug 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 7);
+                assert.equal(strptime("1 Sep 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 8);
+                assert.equal(strptime("1 Oct 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 9);
+                assert.equal(strptime("1 Nov 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 10);
                 assert.equal(strptime("1 Dec 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 11);
                 assert.equal(strptime("1 January 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 0);
+                assert.equal(strptime("1 November 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 10);
                 assert.equal(strptime("1 December 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 11);
                 assert.equal(strptime("1 APRIL 2018", "%-d %B %Y", {tz: 0}).getUTCMonth(), 3);
             });
